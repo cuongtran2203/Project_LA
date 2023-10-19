@@ -3,6 +3,7 @@ import sqlite3
 import pandas as pd
 import tensorflow
 import paths
+import tensorflow as tf
 from sklearn.utils import resample
 from sklearn.model_selection import train_test_split
 from tensorflow.keras.models import Sequential
@@ -73,8 +74,8 @@ def train_model(X_train,y_train,batch_size=512,epoch=2):
     model.add(SpatialDropout1D(0.4))
     model.add(LSTM(196, dropout=0.2, recurrent_dropout=0.2))
     model.add(Dense(28, activation='softmax'))  # Adjust the output dimension based on your number of genres
-    
-    model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
+    loss= tf.keras.losses.CategoricalCrossentropy()
+    model.compile(loss=loss, optimizer='adam', metrics=['accuracy'])
     # Train model
     print(model.summary())
 
