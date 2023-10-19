@@ -4,9 +4,16 @@ import os
 import tensorflow
 from tensorflow.keras.models import load_model
 # Import any additional libraries or modules you may need
-
+from tensorflow.keras.preprocessing.text import Tokenizer
+from tensorflow.keras.preprocessing.sequence import pad_sequences
+import numpy as np
 import paths
-
+def preprocess(X:str):
+    tokenizer = Tokenizer(num_words=300)
+    tokenizer.fit_on_texts([X])
+    X = tokenizer.texts_to_sequences([X])
+    X = pad_sequences(X, maxlen=200)
+    return X
 def classify_tv_show(input_file, output_json_file, encoding='UTF-8', explanation_output_dir=None):
     try:
         # Read the description from the input file
@@ -15,7 +22,7 @@ def classify_tv_show(input_file, output_json_file, encoding='UTF-8', explanation
         
         # Implement your classification logic here to identify TV show genres
         # load your model from somewhere in the /app directory
-        load_model=load_model(paths.location_of_model)
+        model=load_model(paths.location_of_model)
         # This is a placeholder; you should replace it with your actual code
         # genres = classify_tv_show(description)
 
@@ -25,10 +32,19 @@ def classify_tv_show(input_file, output_json_file, encoding='UTF-8', explanation
        'Family', 'Supernatural', 'History', 'Thriller', 'Fantasy',
        'Medical', 'Nature', 'Travel', 'Sports', 'DIY', 'Adult', 'Music',
        'Horror', 'Food', 'Espionage', 'Western']
+        with open(input_file,"r") as f:
+            data_list=f.readlines()
+        for data in data_list:
+            input=preprocess(data.replace("\n","").lower())
+            output=model.predict(input)
+            print(output)
+            predicted_label_index = np.argmax(output, axis=1)
 
-        # Write the identified genres to the output JSON file
-        with open(output_json_file, 'w', encoding='UTF-8') as json_file:
-            json.dump(genres, json_file, ensure_ascii=False)
+            
+        
+            # Write the identified genres to the output JSON file
+            with open(output_json_file, 'w', encoding='UTF-8') as json_file:
+                json.dump(genres[predicted_label_index[0]], json_file, ensure_ascii=False)
 
         # Optionally, write an explanation to the explanation output directory
         if explanation_output_dir:
