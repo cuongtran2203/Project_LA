@@ -19,7 +19,7 @@ def index_data(sqlite_file,query="SELECT * FROM tvmaze"):
         cursor.execute(query)
 
         data_to_index = {}
-        vector_list=[]
+        description_list=[]
         for row in cursor.fetchall():
             # Perform any preprocessing tasks here (e.g., calculate embeddings, stem words)
             # This is a placeholder; replace with your actual preprocessing code
@@ -28,17 +28,15 @@ def index_data(sqlite_file,query="SELECT * FROM tvmaze"):
             new_description_vector=0
             
             id,showname,description = preprocess_data(row)
-            print(id,showname)
-            if len(showname)>5 and description is not None and description!="None" and showname!="None":
-    
-                X= vectorizer.fit_transform([description])
+            if len(showname)>5 and description is not None and description!="None" and showname!="None" and len(description)>10:
+                # print(description)
+                
                 dict_={str(id):{showname:description}}
                 data_to_index.update(dict_)
-                vector_list.append(X)
-
-        print(X)
- 
-        
+                description_list.append(description)
+        X=vectorizer.fit_transform(description_list) 
+        with open("vectors.pkl","wb") as f:
+            pickle.dump(X,f)
         with open(paths.location_of_index, 'a+',encoding="utf-8") as index_file:
             json.dump(data_to_index,index_file,indent = 4,ensure_ascii=False)
         # Save the indexed data to a separate file (e.g., JSON? Flat lines?)

@@ -5,12 +5,10 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 # Import any additional libraries or modules you may need
 import pandas as pd
+import pickle
+import numpy as np
 import paths
-def load_data(sqlite_file):
-    con=sqlite3.connect(sqlite_file)
-    df_info=pd.read_sql_query("SELECT * from tvmaze",con)
-    df_genre=pd.read_sql_query("SELECT * from tvmaze_genre",con)
-    con.close()
+vectorizer = TfidfVectorizer(stop_words="english")
 def search_tv_shows(input_file, output_json_file, encoding='UTF-8'):
     try:
         # Do something with your index, whereever you put it.
@@ -22,7 +20,16 @@ def search_tv_shows(input_file, output_json_file, encoding='UTF-8'):
         # matched_shows = search_tv_shows(search_query)
         description=[]
         with open(input_file) as f:
-            database=json.load(f)
+            data_list=f.readlines()
+        
+        #load vector database
+        with open("vectors.pkl",'rb') as file:
+            vectors=pickle.load(file)
+        new_description_vector = vectorizer.transform(["about description"])
+        similarity_scores = cosine_similarity(new_description_vector, vectors)
+        # Sắp xếp kết quả
+        top_indices = similarity_scores[0].argsort()[-3:][::-1]
+        print(top_indices)
         # Example matched shows (replace with your actual search results)
         matched_shows = [
             {"tvmaze_id": 1, "showname": "Show 1"},
