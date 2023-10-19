@@ -7,6 +7,8 @@ import pickle
 import paths
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
+import pandas as pd
+from rank_bm25 import BM25Okapi
 vectorizer = TfidfVectorizer(stop_words="english")
 def index_data(sqlite_file,query="SELECT * FROM tvmaze"):
     try:
@@ -34,9 +36,7 @@ def index_data(sqlite_file,query="SELECT * FROM tvmaze"):
                 dict_={str(id):{showname:description}}
                 data_to_index.update(dict_)
                 description_list.append(description)
-        X=vectorizer.fit_transform(description_list) 
-        with open("vectors.pkl","wb") as f:
-            pickle.dump(X,f)
+        
         with open(paths.location_of_index, 'a+',encoding="utf-8") as index_file:
             json.dump(data_to_index,index_file,indent = 4,ensure_ascii=False)
         # Save the indexed data to a separate file (e.g., JSON? Flat lines?)
@@ -62,6 +62,7 @@ def preprocess_data(data):
         showname=data[2]
         description=data[-1]
         description=remove_tags(description)
+        # description=description.split(" ")
         return id,showname,description
     return 999999999999,"None","None"
 

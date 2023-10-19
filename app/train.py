@@ -57,9 +57,9 @@ def prepocess(df_info,df_genre):
     df_info["description"].str.lower()
     df_merged=pd.merge(df_info,df_genre,on="tvmaze_id",how="inner")
     df_resample=resample_dataset(df_merged)
-    grouped_df = df_resample.groupby(['tvmaze_id',"description"])['genre'].apply(set).reset_index()
-    grouped_df["genre"]=grouped_df["genre"].apply(lambda x:onehot(x))
-    return  grouped_df
+    # grouped_df = df_resample.groupby(['tvmaze_id',"description"])['genre'].apply(set).reset_index()
+    # grouped_df["genre"]=grouped_df["genre"].apply(lambda x:onehot(x))
+    return  df_resample
 
     
     
@@ -72,7 +72,7 @@ def train_model(X_train,y_train,batch_size=512,epoch=2):
     model.add(Embedding(5000, 128, input_length=X.shape[1]))
     model.add(SpatialDropout1D(0.4))
     model.add(LSTM(196, dropout=0.2, recurrent_dropout=0.2))
-    model.add(Dense(28, activation='sigmoid'))  # Adjust the output dimension based on your number of genres
+    model.add(Dense(28, activation='softmax'))  # Adjust the output dimension based on your number of genres
     
     model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
     # Train model
@@ -113,9 +113,9 @@ if __name__ == "__main__":
     tokenizer.fit_on_texts(X)
     X = tokenizer.texts_to_sequences(X)
     X = pad_sequences(X, maxlen=200)
-    # Encoding labels
-    # label_encoder = LabelEncoder()
-    # y = label_encoder.fit_transform(y)
+    #Encoding labels
+    label_encoder = LabelEncoder()
+    y = label_encoder.fit_transform(y)
     # Split data
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
     print(y_train)

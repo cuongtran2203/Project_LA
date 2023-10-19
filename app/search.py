@@ -7,6 +7,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 import pandas as pd
 import pickle
 import numpy as np
+from rank_bm25 import BM25Okapi
 import paths
 vectorizer = TfidfVectorizer(stop_words="english")
 def search_tv_shows(input_file, output_json_file, encoding='UTF-8'):
@@ -19,27 +20,44 @@ def search_tv_shows(input_file, output_json_file, encoding='UTF-8'):
         # read from the file you saved in index.py
         # matched_shows = search_tv_shows(search_query)
         description=[]
-        with open(input_file) as f:
+        with open("inputs.json",encoding="utf8") as f:
+            data_json=json.load(f)
+        for key in data_json.keys():
+            for k in data_json[key].keys():
+                description.append(data_json[key][k])
+        tokenized_corpus=[doc.split(" ") for doc in description]
+        bm25_ranking=BM25Okapi(tokenized_corpus)
+        top3=None
+        with open(input_file,"r",encoding="utf8") as f:
             data_list=f.readlines()
-        
+        for data in data_list:
+            data=data.replace("\n","")
+            data=data.split(" ")
+            top3=bm25_ranking.get_top_n(query=data,documents=description,n=3)
+            # print(len(top3))
+    
         #load vector database
-        with open("vectors.pkl",'rb') as file:
-            vectors=pickle.load(file)
-        new_description_vector = vectorizer.transform(["about description"])
-        similarity_scores = cosine_similarity(new_description_vector, vectors)
-        # Sắp xếp kết quả
-        top_indices = similarity_scores[0].argsort()[-3:][::-1]
-        print(top_indices)
+        # tfidf=vectorizer.fit(["human resilience, and the quest for knowledge in the face of the unknown. It explores themes of time, space, and the boundaries of human understanding as the characters navigate this surreal and captivating world within the cosmic chronometer."])
+
         # Example matched shows (replace with your actual search results)
-        matched_shows = [
-            {"tvmaze_id": 1, "showname": "Show 1"},
-            {"tvmaze_id": 2, "showname": "Show 2"},
-            {"tvmaze_id": 3, "showname": "Show 3"}
-        ]
+        matched_shows = []
+        dict_=dict()
+        for key in data_json.keys():
+            for k in data_json[key].keys():
+                # print(k)
+                for t in top3:
+                    # print(t)
+                    check_str=data_json[key][k]
+                    # print(check_str)
+                    if check_str == t:
+                       
+                        dict_["tvmaze_id"]=key
+                        dict_["showname"]=k
+                        matched_shows.append(dict_)
 
         # Write the matched shows to the output JSON file
         with open(output_json_file, 'w', encoding='UTF-8') as json_file:
-            json.dump(matched_shows, json_file, ensure_ascii=False)
+            json.dump(matched_shows, json_file, ensure_ascii=False,indent=4)
     except Exception as e:
         print(f"An error occurred: {str(e)}")
 
