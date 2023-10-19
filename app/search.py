@@ -33,6 +33,8 @@ def search_tv_shows(input_file, output_json_file, encoding='UTF-8'):
         for data in data_list:
             data=data.replace("\n","")
             data=data.split(" ")
+            score=bm25_ranking.get_scores(data)
+            top_results = sorted(range(len(score)), key=lambda i: -score[i])
             top3=bm25_ranking.get_top_n(query=data,documents=description,n=3)
             # print(len(top3))
     

@@ -113,7 +113,7 @@ if __name__ == "__main__":
     tokenizer.fit_on_texts(X)
     X = tokenizer.texts_to_sequences(X)
     X = pad_sequences(X, maxlen=200)
-    #Encoding labels
+    #Encoding labels  
     label_encoder = LabelEncoder()
     y = label_encoder.fit_transform(y)
     # Split data
