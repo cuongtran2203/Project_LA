@@ -49,6 +49,8 @@ def remove_tags(text):
     text = text.replace('</p>', '')
     text = text.replace('</b>', '')
     text = text.replace('<b>', '')
+    text = text.replace('<i>', '')
+    text = text.replace('</i>', '')
     text = text.replace(r'\W', '')
     text=text.lower()
     return text

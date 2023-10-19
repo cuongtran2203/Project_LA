@@ -25,6 +25,7 @@ def search_tv_shows(input_file, output_json_file, encoding='UTF-8'):
         for key in data_json.keys():
             for k in data_json[key].keys():
                 description.append(data_json[key][k])
+        X=vectorizer.fit_transform(description)
         tokenized_corpus=[doc.split(" ") for doc in description]
         bm25_ranking=BM25Okapi(tokenized_corpus)
         top3=None
@@ -32,6 +33,13 @@ def search_tv_shows(input_file, output_json_file, encoding='UTF-8'):
             data_list=f.readlines()
         for data in data_list:
             data=data.replace("\n","")
+            new_vector=vectorizer.transform([data])
+            # Tính toán độ tương đồng
+            similarity_scores = cosine_similarity(new_vector, X)
+
+            # Sắp xếp kết quả
+            top_indices = similarity_scores[0].argsort()[-3:][::-1]
+            print(top_indices)
             data=data.split(" ")
             score=bm25_ranking.get_scores(data)
             top_results = sorted(range(len(score)), key=lambda i: -score[i])
