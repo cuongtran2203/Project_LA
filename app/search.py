@@ -9,23 +9,16 @@ import pickle
 import numpy as np
 from rank_bm25 import BM25Okapi
 import paths
-vectorizer = TfidfVectorizer(stop_words="english")
+# vectorizer = TfidfVectorizer(stop_words="english")
 def search_tv_shows(input_file, output_json_file, encoding='UTF-8'):
     try:
-        # Do something with your index, whereever you put it.
-
-        # Read the search query from the input file
-        
-        # Implement your search logic here to find matching TV shows
-        # read from the file you saved in index.py
-        # matched_shows = search_tv_shows(search_query)
         description=[]
         with open("inputs.json",encoding="utf8") as f:
             data_json=json.load(f)
         for key in data_json.keys():
             for k in data_json[key].keys():
                 description.append(data_json[key][k])
-        X=vectorizer.fit_transform(description)
+        # X=vectorizer.fit_transform(description)
         tokenized_corpus=[doc.split(" ") for doc in description]
         bm25_ranking=BM25Okapi(tokenized_corpus)
         top3=None
@@ -33,38 +26,16 @@ def search_tv_shows(input_file, output_json_file, encoding='UTF-8'):
             data_list=f.readlines()
         for data in data_list:
             data=data.replace("\n","")
-            new_vector=vectorizer.transform([data])
-            # Tính toán độ tương đồng
-            similarity_scores = cosine_similarity(new_vector, X)
-
-            # Sắp xếp kết quả
-            top_indices = similarity_scores[0].argsort()[-3:][::-1]
-            print(top_indices)
             data=data.split(" ")
             score=bm25_ranking.get_scores(data)
-            top_results = sorted(range(len(score)), key=lambda i: -score[i])
-            top3=bm25_ranking.get_top_n(query=data,documents=description,n=3)
-            # print(len(top3))
-    
-        #load vector database
-        # tfidf=vectorizer.fit(["human resilience, and the quest for knowledge in the face of the unknown. It explores themes of time, space, and the boundaries of human understanding as the characters navigate this surreal and captivating world within the cosmic chronometer."])
-
-        # Example matched shows (replace with your actual search results)
+            top3= np.argsort(score)[::-1][:3]
+            # print(top3)
         matched_shows = []
-        dict_=dict()
-        for key in data_json.keys():
-            for k in data_json[key].keys():
-                # print(k)
-                for t in top3:
-                    # print(t)
-                    check_str=data_json[key][k]
-                    # print(check_str)
-                    if check_str == t:
-                       
-                        dict_["tvmaze_id"]=key
-                        dict_["showname"]=k
-                        matched_shows.append(dict_)
-
+        for top in top3:
+            dict_=dict()  
+            dict_["tvmaze_id"]=list(data_json.keys())[top]
+            dict_["showname"]=list(list(data_json.values())[top].keys())[0]
+            matched_shows.append(dict_)
         # Write the matched shows to the output JSON file
         with open(output_json_file, 'w', encoding='UTF-8') as json_file:
             json.dump(matched_shows, json_file, ensure_ascii=False,indent=4)

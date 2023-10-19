@@ -40,8 +40,6 @@ def classify_tv_show(input_file, output_json_file, encoding='UTF-8', explanation
             print(output)
             predicted_label_index = np.argmax(output, axis=1)
 
-            
-        
             # Write the identified genres to the output JSON file
             with open(output_json_file, 'w', encoding='UTF-8') as json_file:
                 json.dump(genres[predicted_label_index[0]], json_file, ensure_ascii=False)
