@@ -10,6 +10,16 @@ import numpy as np
 from rank_bm25 import BM25Okapi
 import paths
 # vectorizer = TfidfVectorizer(stop_words="english")
+def remove_tags(text):
+    text = text.replace('<p>', '')
+    text = text.replace('</p>', '')
+    text = text.replace('</b>', '')
+    text = text.replace('<b>', '')
+    text = text.replace('<i>', '')
+    text = text.replace('</i>', '')
+    text = text.replace(r'\W', '')
+    text=text.lower()
+    return text
 def search_tv_shows(input_file, output_json_file, encoding='UTF-8'):
     try:
         description=[]
@@ -26,6 +36,7 @@ def search_tv_shows(input_file, output_json_file, encoding='UTF-8'):
             data_list=f.readlines()
         for data in data_list:
             data=data.replace("\n","")
+            data=remove_tags(data)
             data=data.split(" ")
             score=bm25_ranking.get_scores(data)
             top3= np.argsort(score)[::-1][:3]
