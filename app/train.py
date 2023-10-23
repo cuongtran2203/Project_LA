@@ -85,7 +85,7 @@ def train_model(X_train,y_train,batch_size=512,epoch=2):
     embedded = Embedding(max_tokens + 1, embedding_dim)(vectorized)
     averaged = GlobalAveragePooling1D()(embedded)
     thinking = Dense(128, activation='relu')(averaged)
-    output = Dense(28, activation='softmax')(thinking)
+    output = Dense(28, activation='sigmoid')(thinking)
     model = Model(inputs=[inputs], outputs=[output])
     model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
     early_stopping = keras.callbacks.EarlyStopping(monitor='val_loss',

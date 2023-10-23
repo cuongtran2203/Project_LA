@@ -36,7 +36,7 @@ def classify_tv_show(input_file, output_json_file, encoding='UTF-8', explanation
         model=load_model(paths.location_of_model)
         # This is a placeholder; you should replace it with your actual code
         # genres = classify_tv_show(description)
-        threshold=0.4
+        threshold=0.35
         count=0
         # Example genres (replace with your actual genre prediction)
         genres = ['Drama', 'Anime', 'Mystery', 'Comedy', 'Crime', 'Romance', 'Legal',
