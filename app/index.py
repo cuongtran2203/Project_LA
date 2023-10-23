@@ -26,9 +26,7 @@ def index_data(sqlite_file,query="SELECT * FROM tvmaze"):
             # Perform any preprocessing tasks here (e.g., calculate embeddings, stem words)
             # This is a placeholder; replace with your actual preprocessing code
             showname=""
-            description=""
-            new_description_vector=0
-            
+            description=""            
             id,showname,description = preprocess_data(row)
             if len(showname)>5 and description is not None and description!="None" and showname!="None" and len(description)>10:
                 # print(description)
