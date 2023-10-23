@@ -4,5 +4,5 @@
 location_of_index = './inputs.json'
 
 # You choose where you want to put the trained model
-location_of_model = './weights/best_model_v1.h5'
+location_of_model = './best_model'
 vector="./vectors.pkl"

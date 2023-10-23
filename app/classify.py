@@ -14,6 +14,17 @@ def preprocess(X:str):
     X = tokenizer.texts_to_sequences([X])
     X = pad_sequences(X, maxlen=200)
     return X
+#Loại bỏ những kí tự đặc biệt
+def remove_tags(text):
+    text = text.replace('<p>', '')
+    text = text.replace('</p>', '')
+    text = text.replace('</b>', '')
+    text = text.replace('<b>', '')
+    text = text.replace(r'\W', '')
+    text = text.replace('</i>', '')
+    text = text.replace('<i>', '')
+    text=text.lower()
+    return text
 def classify_tv_show(input_file, output_json_file, encoding='UTF-8', explanation_output_dir=None):
     try:
         # Read the description from the input file
@@ -25,7 +36,8 @@ def classify_tv_show(input_file, output_json_file, encoding='UTF-8', explanation
         model=load_model(paths.location_of_model)
         # This is a placeholder; you should replace it with your actual code
         # genres = classify_tv_show(description)
-
+        threshold=0.4
+        count=0
         # Example genres (replace with your actual genre prediction)
         genres = ['Drama', 'Anime', 'Mystery', 'Comedy', 'Crime', 'Romance', 'Legal',
        'Children', 'War', 'Action', 'Adventure', 'Science-Fiction',
@@ -35,14 +47,26 @@ def classify_tv_show(input_file, output_json_file, encoding='UTF-8', explanation
         with open(input_file,"r") as f:
             data_list=f.readlines()
         for data in data_list:
-            input=preprocess(data.replace("\n","").lower())
-            output=model.predict(input)
+            # input=preprocess(data.replace("\n","").lower())
+            data=remove_tags(data)
+            
+            output=model.predict([data])
             print(output)
-            predicted_label_index = np.argmax(output, axis=1)
-
-            # Write the identified genres to the output JSON file
+            output=np.where(output>=threshold,1,0)
+            idx=np.where(np.asarray(output)>=threshold)
+            print(idx)
+            result=[]
+            for i in idx:
+                # # Write the identified genres to the output JSON file
+                if i.size>0:
+                    for ix in i:
+                        if genres[ix] not in result:
+                            result.append(genres[ix])
+                            print(genres[ix])
+            print(result)
             with open(output_json_file, 'w', encoding='UTF-8') as json_file:
-                json.dump(genres[predicted_label_index[0]], json_file, ensure_ascii=False)
+                json.dump({count:result}, json_file, ensure_ascii=False,indent=4)
+            count+=1
 
         # Optionally, write an explanation to the explanation output directory
         if explanation_output_dir:
